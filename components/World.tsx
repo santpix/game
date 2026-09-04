@@ -4,441 +4,377 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
-type Vec3Tuple = [number, number, number];
+type Vec3 = [number, number, number];
 type BuildingId = "santpix" | "merco" | "dropi" | "bank" | "ai";
 
 type BuildingDef = {
   id: BuildingId;
   label: string;
   subtitle: string;
-  position: Vec3Tuple;
+  position: Vec3;
   radius: number;
   accent: string;
 };
 
 const BUILDINGS: BuildingDef[] = [
-  { id: "santpix", label: "SANTPIX", subtitle: "Tecnología & Ecommerce", position: [-5.8, 0, -3.4], radius: 2.7, accent: "#f0e9dc" },
-  { id: "merco", label: "MERCO", subtitle: "Crecimiento & Performance", position: [0, 0, -6.2], radius: 2.65, accent: "#cdb786" },
-  { id: "dropi", label: "DROPI", subtitle: "Comercio & Fulfillment", position: [5.9, 0, -2.8], radius: 2.85, accent: "#a7b9aa" },
-  { id: "bank", label: "BANCO", subtitle: "Capital & Crédito", position: [-5.1, 0, 4.8], radius: 2.5, accent: "#d0c7b8" },
-  { id: "ai", label: "CENTRO IA", subtitle: "Análisis & Automatización", position: [4.9, 0, 4.7], radius: 2.6, accent: "#aeb9ca" },
+  { id: "santpix", label: "SANTPIX", subtitle: "Tecnología & Ecommerce", position: [-6.2, 0, -3.8], radius: 2.8, accent: "#f0e9dc" },
+  { id: "merco", label: "MERCO", subtitle: "Crecimiento & Performance", position: [0, 0, -6.6], radius: 2.7, accent: "#cdb786" },
+  { id: "dropi", label: "DROPI", subtitle: "Comercio & Fulfillment", position: [6.2, 0, -3.1], radius: 2.9, accent: "#a7b9aa" },
+  { id: "bank", label: "BANCO", subtitle: "Capital & Crédito", position: [-5.5, 0, 5.2], radius: 2.6, accent: "#d0c7b8" },
+  { id: "ai", label: "CENTRO IA", subtitle: "Análisis & Automatización", position: [5.2, 0, 5.0], radius: 2.7, accent: "#aeb9ca" },
 ];
 
-const mat = {
-  charcoal: "#171817",
-  graphite: "#242523",
-  stone: "#c9c2b4",
-  stoneDark: "#aaa294",
-  glass: "#91a2a3",
-  warmGlass: "#cfc3a2",
-  road: "#363735",
-  curb: "#ded8cc",
-  green: "#52604d",
-  green2: "#65725e",
-  brass: "#aa9465",
+const C = {
+  dark: "#141514",
+  charcoal: "#1c1d1c",
+  graphite: "#2b2c2a",
+  stone: "#d5cec0",
+  stone2: "#b9b1a3",
+  glass: "#91a6a8",
+  warmGlass: "#d1c4a4",
+  road: "#343533",
+  green: "#50604c",
+  green2: "#66755e",
+  brass: "#ad9665",
 };
 
-function WindowStrip({ position, size = [2.2, 0.34, 0.05], color = mat.glass, emissive = mat.glass, rotation = [0, 0, 0] as Vec3Tuple }: { position: Vec3Tuple; size?: Vec3Tuple; color?: string; emissive?: string; rotation?: Vec3Tuple }) {
+function Glass({ position, size, rotation = [0, 0, 0], warm = false }: { position: Vec3; size: Vec3; rotation?: Vec3; warm?: boolean }) {
+  const color = warm ? C.warmGlass : C.glass;
   return (
     <mesh position={position} rotation={rotation}>
       <boxGeometry args={size} />
-      <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={0.18} metalness={0.42} roughness={0.18} />
+      <meshPhysicalMaterial color={color} emissive={color} emissiveIntensity={0.12} metalness={0.35} roughness={0.12} clearcoat={0.5} />
     </mesh>
   );
 }
 
-function Planter({ position, scale = 1 }: { position: Vec3Tuple; scale?: number }) {
+function Planter({ position, scale = 1 }: { position: Vec3; scale?: number }) {
   return (
     <group position={position} scale={scale}>
       <mesh position={[0, 0.18, 0]} castShadow>
         <boxGeometry args={[1.05, 0.36, 0.56]} />
-        <meshStandardMaterial color="#9b9488" roughness={0.88} />
+        <meshStandardMaterial color="#978f82" roughness={0.9} />
       </mesh>
       {[-0.28, 0, 0.28].map((x) => (
-        <mesh key={x} position={[x, 0.55, 0]} castShadow>
-          <sphereGeometry args={[0.23, 12, 12]} />
-          <meshStandardMaterial color={x === 0 ? mat.green2 : mat.green} roughness={0.95} />
+        <mesh key={x} position={[x, 0.54, 0]} castShadow>
+          <icosahedronGeometry args={[0.24, 1]} />
+          <meshStandardMaterial color={x === 0 ? C.green2 : C.green} roughness={0.95} />
         </mesh>
       ))}
     </group>
   );
 }
 
-function Bench({ position, rotationY = 0 }: { position: Vec3Tuple; rotationY?: number }) {
+function Bench({ position, rotationY = 0 }: { position: Vec3; rotationY?: number }) {
   return (
     <group position={position} rotation={[0, rotationY, 0]}>
-      <mesh position={[0, 0.42, 0]} castShadow>
-        <boxGeometry args={[1.35, 0.12, 0.42]} />
-        <meshStandardMaterial color="#6f5b48" roughness={0.68} />
-      </mesh>
-      <mesh position={[0, 0.72, 0.18]} rotation={[-0.14, 0, 0]} castShadow>
-        <boxGeometry args={[1.35, 0.45, 0.1]} />
-        <meshStandardMaterial color="#6f5b48" roughness={0.68} />
-      </mesh>
-      {[-0.48, 0.48].map((x) => (
-        <mesh key={x} position={[x, 0.2, 0]} castShadow>
-          <boxGeometry args={[0.08, 0.4, 0.34]} />
-          <meshStandardMaterial color="#252525" metalness={0.6} roughness={0.35} />
-        </mesh>
-      ))}
+      <mesh position={[0, 0.42, 0]} castShadow><boxGeometry args={[1.35, 0.12, 0.42]} /><meshStandardMaterial color="#725d48" roughness={0.72} /></mesh>
+      <mesh position={[0, 0.72, 0.18]} rotation={[-0.12, 0, 0]} castShadow><boxGeometry args={[1.35, 0.45, 0.1]} /><meshStandardMaterial color="#725d48" roughness={0.72} /></mesh>
+      {[-0.48, 0.48].map((x) => <mesh key={x} position={[x, 0.2, 0]} castShadow><boxGeometry args={[0.08, 0.4, 0.34]} /><meshStandardMaterial color="#222" metalness={0.6} roughness={0.32} /></mesh>)}
     </group>
   );
 }
 
-function Tree({ position, scale = 1 }: { position: Vec3Tuple; scale?: number }) {
+function Tree({ position, scale = 1 }: { position: Vec3; scale?: number }) {
+  const crown = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (crown.current) crown.current.rotation.z = Math.sin(clock.elapsedTime * 0.6 + position[0]) * 0.018;
+  });
   return (
     <group position={position} scale={scale}>
-      <mesh position={[0, 0.72, 0]} castShadow>
-        <cylinderGeometry args={[0.12, 0.18, 1.45, 10]} />
-        <meshStandardMaterial color="#4b3f34" roughness={1} />
-      </mesh>
-      <mesh position={[0, 1.72, 0]} castShadow>
-        <icosahedronGeometry args={[0.72, 1]} />
-        <meshStandardMaterial color={mat.green} roughness={0.95} />
-      </mesh>
-      <mesh position={[0.42, 1.78, -0.08]} castShadow>
-        <icosahedronGeometry args={[0.5, 1]} />
-        <meshStandardMaterial color={mat.green2} roughness={0.95} />
-      </mesh>
-      <mesh position={[-0.32, 1.88, 0.13]} castShadow>
-        <icosahedronGeometry args={[0.46, 1]} />
-        <meshStandardMaterial color="#5b6754" roughness={0.95} />
-      </mesh>
+      <mesh position={[0, 0.72, 0]} castShadow><cylinderGeometry args={[0.12, 0.19, 1.45, 10]} /><meshStandardMaterial color="#4b3d32" roughness={1} /></mesh>
+      <group ref={crown} position={[0, 1.75, 0]}>
+        <mesh castShadow><icosahedronGeometry args={[0.72, 1]} /><meshStandardMaterial color={C.green} roughness={0.95} /></mesh>
+        <mesh position={[0.43, 0.1, -0.08]} castShadow><icosahedronGeometry args={[0.5, 1]} /><meshStandardMaterial color={C.green2} roughness={0.95} /></mesh>
+        <mesh position={[-0.34, 0.18, 0.12]} castShadow><icosahedronGeometry args={[0.47, 1]} /><meshStandardMaterial color="#5a6854" roughness={0.95} /></mesh>
+      </group>
     </group>
   );
 }
 
-function StreetLight({ position }: { position: Vec3Tuple }) {
+function StreetLight({ position }: { position: Vec3 }) {
   return (
     <group position={position}>
-      <mesh position={[0, 1.25, 0]} castShadow>
-        <cylinderGeometry args={[0.035, 0.055, 2.5, 10]} />
-        <meshStandardMaterial color="#1c1d1c" metalness={0.72} roughness={0.32} />
-      </mesh>
-      <mesh position={[0, 2.48, 0]}>
-        <cylinderGeometry args={[0.11, 0.13, 0.18, 12]} />
-        <meshStandardMaterial color="#222" metalness={0.65} roughness={0.32} />
-      </mesh>
-      <mesh position={[0, 2.58, 0]}>
-        <sphereGeometry args={[0.12, 12, 12]} />
-        <meshStandardMaterial color="#fff0c2" emissive="#ffd988" emissiveIntensity={2.1} />
-      </mesh>
-      <pointLight position={[0, 2.5, 0]} intensity={0.55} distance={4.2} color="#ffdca0" />
+      <mesh position={[0, 1.25, 0]} castShadow><cylinderGeometry args={[0.035, 0.055, 2.5, 10]} /><meshStandardMaterial color="#191a19" metalness={0.75} roughness={0.3} /></mesh>
+      <mesh position={[0, 2.55, 0]}><sphereGeometry args={[0.12, 14, 14]} /><meshStandardMaterial color="#fff1c9" emissive="#ffd889" emissiveIntensity={2.4} /></mesh>
+      <pointLight position={[0, 2.45, 0]} intensity={0.55} distance={4.5} color="#ffdba0" />
     </group>
   );
 }
 
 function SantPixBuilding({ active }: { active: boolean }) {
-  const accent = "#f0e9dc";
   return (
     <group>
-      <mesh position={[-0.45, 2.65, 0]} castShadow receiveShadow>
-        <boxGeometry args={[2.55, 5.3, 2.7]} />
-        <meshPhysicalMaterial color="#151615" roughness={0.28} metalness={0.42} clearcoat={0.45} emissive={active ? accent : "#000"} emissiveIntensity={active ? 0.08 : 0} />
-      </mesh>
-      <mesh position={[1.05, 1.65, 0.28]} castShadow>
-        <boxGeometry args={[1.45, 3.3, 2.2]} />
-        <meshStandardMaterial color="#262725" roughness={0.35} metalness={0.3} />
-      </mesh>
-      {[1.1, 2, 2.9, 3.8, 4.7].map((y) => <WindowStrip key={y} position={[-0.45, y, 1.375]} size={[1.85, 0.42, 0.045]} color="#94a3a2" />)}
-      {[0.8, 1.6, 2.4].map((y) => <WindowStrip key={y} position={[1.05, y, 1.405]} size={[0.9, 0.42, 0.045]} color="#c6bea5" emissive="#c6bea5" />)}
-      <mesh position={[0.72, 0.23, 1.82]} castShadow>
-        <boxGeometry args={[2.8, 0.18, 1.1]} />
-        <meshStandardMaterial color={accent} roughness={0.6} />
-      </mesh>
-      <mesh position={[0.7, 1.55, 1.46]} castShadow>
-        <boxGeometry args={[1.45, 0.16, 1.0]} />
-        <meshStandardMaterial color={accent} metalness={0.25} roughness={0.45} />
-      </mesh>
-      {[-0.55, 0, 0.55].map((x) => (
-        <mesh key={x} position={[x + 0.72, 0.82, 1.49]}>
-          <boxGeometry args={[0.32, 1.2, 0.05]} />
-          <meshStandardMaterial color="#9aa7a6" metalness={0.5} roughness={0.18} />
-        </mesh>
-      ))}
-      {[-0.9, -0.3, 0.3, 0.9].map((x) => (
-        <mesh key={x} position={[x - 0.45, 5.72, 0]} castShadow>
-          <boxGeometry args={[0.06, 0.72, 2.4]} />
-          <meshStandardMaterial color={accent} roughness={0.48} />
-        </mesh>
-      ))}
+      <mesh position={[-0.55, 2.8, 0]} castShadow receiveShadow><boxGeometry args={[2.7, 5.6, 2.8]} /><meshPhysicalMaterial color="#121312" roughness={0.24} metalness={0.42} clearcoat={0.55} emissive={active ? "#6e675c" : "#000"} emissiveIntensity={active ? 0.16 : 0} /></mesh>
+      <mesh position={[1.05, 1.75, 0.2]} castShadow><boxGeometry args={[1.55, 3.5, 2.25]} /><meshStandardMaterial color="#272826" roughness={0.32} metalness={0.3} /></mesh>
+      {[1.15, 2.1, 3.05, 4, 4.95].map((y) => <Glass key={y} position={[-0.55, y, 1.42]} size={[1.95, 0.44, 0.05]} />)}
+      {[0.9, 1.75, 2.6].map((y) => <Glass key={y} position={[1.05, y, 1.34]} size={[1.0, 0.42, 0.05]} warm />)}
+      <mesh position={[0.72, 1.62, 1.58]} castShadow><boxGeometry args={[1.55, 0.16, 1.05]} /><meshStandardMaterial color="#e8e0d2" metalness={0.2} roughness={0.45} /></mesh>
+      {[-0.52, 0, 0.52].map((x) => <mesh key={x} position={[x + 0.72, 0.82, 1.48]}><boxGeometry args={[0.34, 1.25, 0.05]} /><meshStandardMaterial color="#9eaaaa" metalness={0.45} roughness={0.16} /></mesh>)}
+      {[-0.9, -0.3, 0.3, 0.9].map((x) => <mesh key={x} position={[x - 0.55, 6.02, 0]} castShadow><boxGeometry args={[0.07, 0.76, 2.45]} /><meshStandardMaterial color="#e9e1d3" roughness={0.46} /></mesh>)}
+      <Planter position={[1.55, 0, 1.55]} scale={0.8} />
     </group>
   );
 }
 
 function MercoBuilding({ active }: { active: boolean }) {
-  const accent = "#cdb786";
   return (
     <group>
-      <mesh position={[0, 1.7, 0]} castShadow>
-        <boxGeometry args={[3.2, 3.4, 2.8]} />
-        <meshStandardMaterial color="#20211f" roughness={0.34} metalness={0.28} emissive={active ? accent : "#000"} emissiveIntensity={active ? 0.08 : 0} />
-      </mesh>
-      <mesh position={[0.35, 3.85, -0.12]} castShadow>
-        <boxGeometry args={[2.5, 1.6, 2.35]} />
-        <meshStandardMaterial color="#2b2b29" roughness={0.36} metalness={0.25} />
-      </mesh>
-      {[0.55, 1.25, 1.95, 2.65, 3.45, 4.05].map((y) => <WindowStrip key={y} position={[0, y, 1.415]} size={[2.55, 0.32, 0.05]} color="#bfc4bd" emissive="#bbb69f" />)}
-      {[-1.25, -0.75, -0.25, 0.25, 0.75, 1.25].map((x) => (
-        <mesh key={x} position={[x, 2.15, 1.49]} castShadow>
-          <boxGeometry args={[0.07, 4.25, 0.09]} />
-          <meshStandardMaterial color={accent} metalness={0.35} roughness={0.42} />
-        </mesh>
-      ))}
-      <mesh position={[0.62, 3.05, 0.98]} castShadow>
-        <boxGeometry args={[1.8, 0.16, 1.5]} />
-        <meshStandardMaterial color="#8d8167" roughness={0.72} />
-      </mesh>
-      <Planter position={[0.1, 3.18, 0.85]} scale={0.62} />
-      <Planter position={[1.1, 3.18, 0.85]} scale={0.62} />
-      <mesh position={[0, 0.78, 1.48]}>
-        <boxGeometry args={[1.2, 1.4, 0.06]} />
-        <meshStandardMaterial color="#8b9898" metalness={0.5} roughness={0.18} />
-      </mesh>
+      <mesh position={[0, 1.75, 0]} castShadow><boxGeometry args={[3.35, 3.5, 2.9]} /><meshStandardMaterial color="#1d1e1c" roughness={0.3} metalness={0.3} emissive={active ? "#6d5d35" : "#000"} emissiveIntensity={active ? 0.15 : 0} /></mesh>
+      <mesh position={[0.45, 4.0, -0.15]} castShadow><boxGeometry args={[2.55, 1.8, 2.4]} /><meshStandardMaterial color="#2b2c29" roughness={0.34} metalness={0.24} /></mesh>
+      {[0.62, 1.35, 2.08, 2.81, 3.58, 4.28].map((y) => <Glass key={y} position={[0, y, 1.47]} size={[2.62, 0.32, 0.05]} warm />)}
+      {[-1.3, -0.78, -0.26, 0.26, 0.78, 1.3].map((x) => <mesh key={x} position={[x, 2.22, 1.53]} castShadow><boxGeometry args={[0.065, 4.35, 0.09]} /><meshStandardMaterial color="#cdb786" metalness={0.3} roughness={0.42} /></mesh>)}
+      <mesh position={[0.65, 3.08, 1.03]} castShadow><boxGeometry args={[1.9, 0.16, 1.55]} /><meshStandardMaterial color="#85785f" roughness={0.72} /></mesh>
+      <Planter position={[0.15, 3.2, 0.95]} scale={0.62} /><Planter position={[1.15, 3.2, 0.95]} scale={0.62} />
     </group>
   );
 }
 
 function DropiBuilding({ active }: { active: boolean }) {
-  const accent = "#a7b9aa";
   return (
     <group>
-      <mesh position={[0, 1.3, 0.15]} castShadow>
-        <boxGeometry args={[4.2, 2.6, 3.2]} />
-        <meshStandardMaterial color="#202522" roughness={0.46} metalness={0.18} emissive={active ? accent : "#000"} emissiveIntensity={active ? 0.08 : 0} />
-      </mesh>
-      <mesh position={[1.05, 3.55, -0.3]} castShadow>
-        <boxGeometry args={[1.8, 4.5, 2.1]} />
-        <meshStandardMaterial color="#171a18" roughness={0.35} metalness={0.28} />
-      </mesh>
-      {[2.25, 3.05, 3.85, 4.65, 5.45].map((y) => <WindowStrip key={y} position={[1.05, y, 0.765]} size={[1.25, 0.34, 0.05]} color="#a8b5af" emissive="#9cab9e" />)}
-      {[-1.15, 0, 1.15].map((x) => (
-        <group key={x} position={[x - 0.55, 0, 1.79]}>
-          <mesh position={[0, 0.78, 0]}>
-            <boxGeometry args={[0.9, 1.35, 0.08]} />
-            <meshStandardMaterial color="#b8beb9" metalness={0.35} roughness={0.3} />
-          </mesh>
-          <mesh position={[0, 1.52, 0.28]} castShadow>
-            <boxGeometry args={[1.08, 0.12, 0.64]} />
-            <meshStandardMaterial color={accent} roughness={0.55} />
-          </mesh>
-        </group>
-      ))}
-      {[-1.35, -0.85, -0.35].map((x) => (
-        <mesh key={x} position={[x, 2.78, 0.2]} castShadow>
-          <cylinderGeometry args={[0.16, 0.18, 0.45, 12]} />
-          <meshStandardMaterial color="#727a74" metalness={0.5} roughness={0.42} />
-        </mesh>
-      ))}
-      <mesh position={[-1.75, 1.55, -0.5]} castShadow>
-        <boxGeometry args={[0.16, 2.2, 2.0]} />
-        <meshStandardMaterial color={accent} roughness={0.58} />
-      </mesh>
+      <mesh position={[-0.3, 1.38, 0.1]} castShadow><boxGeometry args={[4.35, 2.75, 3.3]} /><meshStandardMaterial color="#1f2421" roughness={0.43} metalness={0.2} emissive={active ? "#49604f" : "#000"} emissiveIntensity={active ? 0.16 : 0} /></mesh>
+      <mesh position={[1.15, 3.72, -0.3]} castShadow><boxGeometry args={[1.9, 4.7, 2.15]} /><meshStandardMaterial color="#151916" roughness={0.32} metalness={0.3} /></mesh>
+      {[2.25, 3.05, 3.85, 4.65, 5.45].map((y) => <Glass key={y} position={[1.15, y, 0.79]} size={[1.3, 0.34, 0.05]} />)}
+      {[-1.55, -0.3, 0.95].map((x) => <group key={x} position={[x, 0, 1.78]}><mesh position={[0, 0.8, 0]}><boxGeometry args={[0.96, 1.4, 0.08]} /><meshStandardMaterial color="#b7beb9" metalness={0.35} roughness={0.28} /></mesh><mesh position={[0, 1.55, 0.28]} castShadow><boxGeometry args={[1.1, 0.12, 0.64]} /><meshStandardMaterial color="#a7b9aa" roughness={0.55} /></mesh></group>)}
+      {[-1.5, -0.95, -0.4].map((x) => <mesh key={x} position={[x, 2.98, -0.1]} castShadow><cylinderGeometry args={[0.16, 0.19, 0.55, 12]} /><meshStandardMaterial color="#737a75" metalness={0.55} roughness={0.4} /></mesh>)}
     </group>
   );
 }
 
 function BankBuilding({ active }: { active: boolean }) {
-  const accent = "#d0c7b8";
   return (
     <group>
-      <mesh position={[0, 1.65, -0.18]} castShadow>
-        <boxGeometry args={[3.6, 3.3, 2.7]} />
-        <meshStandardMaterial color="#373632" roughness={0.58} metalness={0.12} emissive={active ? accent : "#000"} emissiveIntensity={active ? 0.08 : 0} />
-      </mesh>
-      {[0, 0.16, 0.32].map((y, i) => (
-        <mesh key={i} position={[0, y, 1.62]} castShadow>
-          <boxGeometry args={[3.8 - i * 0.2, 0.16, 1.1 - i * 0.15]} />
-          <meshStandardMaterial color={i === 2 ? accent : mat.stoneDark} roughness={0.72} />
-        </mesh>
-      ))}
-      {[-1.2, -0.4, 0.4, 1.2].map((x) => (
-        <mesh key={x} position={[x, 1.55, 1.34]} castShadow>
-          <cylinderGeometry args={[0.12, 0.16, 2.45, 16]} />
-          <meshStandardMaterial color={accent} roughness={0.62} />
-        </mesh>
-      ))}
-      <mesh position={[0, 2.96, 1.28]} rotation={[0, 0, Math.PI / 4]} castShadow>
-        <boxGeometry args={[2.2, 2.2, 0.24]} />
-        <meshStandardMaterial color={accent} roughness={0.64} />
-      </mesh>
-      <mesh position={[0, 1.0, 1.41]}>
-        <boxGeometry args={[0.9, 1.5, 0.05]} />
-        <meshStandardMaterial color="#6f7e7f" metalness={0.45} roughness={0.2} />
-      </mesh>
+      <mesh position={[0, 1.55, -0.1]} castShadow><boxGeometry args={[3.5, 3.1, 2.75]} /><meshStandardMaterial color="#cfc7b8" roughness={0.7} emissive={active ? "#655f55" : "#000"} emissiveIntensity={active ? 0.12 : 0} /></mesh>
+      <mesh position={[0, 3.25, 0]} castShadow><boxGeometry args={[3.75, 0.28, 3]} /><meshStandardMaterial color="#e2dbce" roughness={0.65} /></mesh>
+      <mesh position={[0, 0.2, 1.7]} castShadow><boxGeometry args={[3.0, 0.4, 1.15]} /><meshStandardMaterial color="#b6ad9f" roughness={0.8} /></mesh>
+      {[-1.2, -0.4, 0.4, 1.2].map((x) => <mesh key={x} position={[x, 1.55, 1.35]} castShadow><cylinderGeometry args={[0.16, 0.2, 2.55, 18]} /><meshStandardMaterial color="#ded7ca" roughness={0.68} /></mesh>)}
+      <Glass position={[0, 1.35, 1.39]} size={[0.9, 1.6, 0.06]} warm />
     </group>
   );
 }
 
-function AiBuilding({ active }: { active: boolean }) {
-  const accent = "#aeb9ca";
+function AIBuilding({ active }: { active: boolean }) {
+  const ring = useRef<THREE.Mesh>(null);
+  useFrame(({ clock }) => {
+    if (ring.current) ring.current.rotation.y = clock.elapsedTime * 0.22;
+  });
   return (
     <group>
-      <mesh position={[0, 2.45, 0]} castShadow>
-        <cylinderGeometry args={[1.35, 1.65, 4.9, 28]} />
-        <meshStandardMaterial color="#1b1e22" roughness={0.28} metalness={0.45} emissive={active ? accent : "#000"} emissiveIntensity={active ? 0.12 : 0} />
-      </mesh>
-      {[1.15, 2.05, 2.95, 3.85].map((y) => (
-        <mesh key={y} position={[0, y, 0]}>
-          <torusGeometry args={[1.52 - y * 0.025, 0.055, 10, 42]} />
-          <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.48} metalness={0.38} roughness={0.28} />
-        </mesh>
-      ))}
+      <mesh position={[0, 2.05, 0]} castShadow><cylinderGeometry args={[1.6, 1.9, 4.1, 32]} /><meshPhysicalMaterial color="#1a1c20" roughness={0.2} metalness={0.55} clearcoat={0.65} emissive={active ? "#536278" : "#000"} emissiveIntensity={active ? 0.18 : 0} /></mesh>
+      {[0.8, 1.55, 2.3, 3.05].map((y) => <mesh key={y} position={[0, y, 0]}><torusGeometry args={[1.74, 0.055, 10, 48]} /><meshStandardMaterial color="#aeb9ca" emissive="#7185a3" emissiveIntensity={0.9} metalness={0.5} roughness={0.22} /></mesh>)}
+      <mesh ref={ring} position={[0, 4.4, 0]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[1.38, 0.08, 12, 64]} /><meshStandardMaterial color="#d9e2ef" emissive="#8599b8" emissiveIntensity={1.4} metalness={0.5} roughness={0.18} /></mesh>
       {Array.from({ length: 10 }).map((_, i) => {
         const a = (i / 10) * Math.PI * 2;
-        const r = 1.43;
-        return <mesh key={i} position={[Math.cos(a) * r, 2.45, Math.sin(a) * r]} rotation={[0, -a, 0]}><boxGeometry args={[0.22, 3.6, 0.06]} /><meshStandardMaterial color="#8292a6" emissive="#77879a" emissiveIntensity={0.18} metalness={0.45} roughness={0.24} /></mesh>;
+        return <mesh key={i} position={[Math.sin(a) * 1.9, 2.15, Math.cos(a) * 1.9]} rotation={[0, a, 0]} castShadow><boxGeometry args={[0.08, 3.55, 0.22]} /><meshStandardMaterial color="#8b98aa" metalness={0.5} roughness={0.28} /></mesh>;
       })}
-      <mesh position={[0, 5.18, 0]} castShadow>
-        <cylinderGeometry args={[0.75, 1.1, 0.32, 28]} />
-        <meshStandardMaterial color={accent} metalness={0.4} roughness={0.35} />
-      </mesh>
-      <mesh position={[0, 0.8, 1.55]}>
-        <boxGeometry args={[0.95, 1.4, 0.06]} />
-        <meshStandardMaterial color="#8fa1b2" emissive="#72879c" emissiveIntensity={0.35} metalness={0.48} roughness={0.18} />
-      </mesh>
     </group>
   );
 }
 
-function PremiumBuilding({ def, active }: { def: BuildingDef; active: boolean }) {
-  const [x, , z] = def.position;
+function Building({ def, active }: { def: BuildingDef; active: boolean }) {
   return (
-    <group position={[x, 0, z]}>
-      <mesh position={[0, 0.06, 0]} receiveShadow>
-        <cylinderGeometry args={[def.radius, def.radius + 0.12, 0.12, 42]} />
-        <meshStandardMaterial color="#bdb6a9" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 0.13, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[def.radius - 0.16, def.radius, 48]} />
-        <meshBasicMaterial color={def.accent} transparent opacity={active ? 0.95 : 0.18} />
-      </mesh>
+    <group position={def.position}>
       {def.id === "santpix" && <SantPixBuilding active={active} />}
       {def.id === "merco" && <MercoBuilding active={active} />}
       {def.id === "dropi" && <DropiBuilding active={active} />}
       {def.id === "bank" && <BankBuilding active={active} />}
-      {def.id === "ai" && <AiBuilding active={active} />}
+      {def.id === "ai" && <AIBuilding active={active} />}
+      <mesh position={[0, 0.035, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[def.radius - 0.12, def.radius, 64]} /><meshBasicMaterial color={def.accent} transparent opacity={active ? 0.95 : 0.15} /></mesh>
     </group>
   );
 }
 
-function Player({ onNearby }: { onNearby: (building: BuildingDef | null) => void }) {
-  const player = useRef<THREE.Group>(null);
+function AnimatedFounder({ onNearby }: { onNearby: (b: BuildingDef | null) => void }) {
+  const root = useRef<THREE.Group>(null);
+  const body = useRef<THREE.Group>(null);
+  const leftArm = useRef<THREE.Group>(null);
+  const rightArm = useRef<THREE.Group>(null);
+  const leftLeg = useRef<THREE.Group>(null);
+  const rightLeg = useRef<THREE.Group>(null);
   const keys = useRef<Record<string, boolean>>({});
+  const { camera, gl } = useThree();
+  const yaw = useRef(Math.PI * 0.12);
+  const pitch = useRef(0.48);
+  const distance = useRef(7.3);
+  const dragging = useRef(false);
+  const lastPointer = useRef({ x: 0, y: 0 });
   const lastInteract = useRef(false);
-  const { camera } = useThree();
-  const velocity = useMemo(() => new THREE.Vector3(), []);
-  const desiredCamera = useMemo(() => new THREE.Vector3(), []);
   const walkPhase = useRef(0);
+  const move = useMemo(() => new THREE.Vector3(), []);
+  const forward = useMemo(() => new THREE.Vector3(), []);
+  const right = useMemo(() => new THREE.Vector3(), []);
+  const desiredCam = useMemo(() => new THREE.Vector3(), []);
+  const target = useMemo(() => new THREE.Vector3(), []);
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      keys.current[e.code] = true;
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) e.preventDefault();
-    };
+    const canvas = gl.domElement;
+    const down = (e: KeyboardEvent) => { keys.current[e.code] = true; if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) e.preventDefault(); };
     const up = (e: KeyboardEvent) => { keys.current[e.code] = false; };
+    const mouseDown = (e: MouseEvent) => { if (e.button === 2 || e.button === 0) { dragging.current = true; lastPointer.current = { x: e.clientX, y: e.clientY }; canvas.style.cursor = "grabbing"; } };
+    const mouseUp = () => { dragging.current = false; canvas.style.cursor = "grab"; };
+    const mouseMove = (e: MouseEvent) => {
+      if (!dragging.current) return;
+      const dx = e.clientX - lastPointer.current.x;
+      const dy = e.clientY - lastPointer.current.y;
+      lastPointer.current = { x: e.clientX, y: e.clientY };
+      yaw.current -= dx * 0.006;
+      pitch.current = THREE.MathUtils.clamp(pitch.current + dy * 0.004, 0.18, 1.08);
+    };
+    const wheel = (e: WheelEvent) => { e.preventDefault(); distance.current = THREE.MathUtils.clamp(distance.current + e.deltaY * 0.008, 3.8, 11.5); };
+    const context = (e: MouseEvent) => e.preventDefault();
     window.addEventListener("keydown", down, { passive: false });
     window.addEventListener("keyup", up);
-    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
-  }, []);
+    canvas.addEventListener("mousedown", mouseDown);
+    window.addEventListener("mouseup", mouseUp);
+    window.addEventListener("mousemove", mouseMove);
+    canvas.addEventListener("wheel", wheel, { passive: false });
+    canvas.addEventListener("contextmenu", context);
+    canvas.style.cursor = "grab";
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      canvas.removeEventListener("mousedown", mouseDown);
+      window.removeEventListener("mouseup", mouseUp);
+      window.removeEventListener("mousemove", mouseMove);
+      canvas.removeEventListener("wheel", wheel);
+      canvas.removeEventListener("contextmenu", context);
+    };
+  }, [gl]);
 
   useFrame((_, delta) => {
-    if (!player.current) return;
-    let x = 0, z = 0;
+    if (!root.current) return;
+    let strafe = 0;
+    let thrust = 0;
     let interact = !!keys.current.KeyE || !!keys.current.Space;
-    if (keys.current.KeyW || keys.current.ArrowUp) z -= 1;
-    if (keys.current.KeyS || keys.current.ArrowDown) z += 1;
-    if (keys.current.KeyA || keys.current.ArrowLeft) x -= 1;
-    if (keys.current.KeyD || keys.current.ArrowRight) x += 1;
+    const sprint = !!keys.current.ShiftLeft || !!keys.current.ShiftRight;
+
+    if (keys.current.KeyW || keys.current.ArrowUp) thrust += 1;
+    if (keys.current.KeyS || keys.current.ArrowDown) thrust -= 1;
+    if (keys.current.KeyA || keys.current.ArrowLeft) strafe -= 1;
+    if (keys.current.KeyD || keys.current.ArrowRight) strafe += 1;
+
     if (typeof navigator !== "undefined" && navigator.getGamepads) {
       const pad = Array.from(navigator.getGamepads()).find(Boolean);
       if (pad) {
         const dead = 0.16;
-        const ax = Math.abs(pad.axes[0] ?? 0) > dead ? pad.axes[0] : 0;
-        const az = Math.abs(pad.axes[1] ?? 0) > dead ? pad.axes[1] : 0;
-        x += ax; z += az; interact = interact || !!pad.buttons[0]?.pressed;
+        const lx = Math.abs(pad.axes[0] ?? 0) > dead ? pad.axes[0] : 0;
+        const ly = Math.abs(pad.axes[1] ?? 0) > dead ? pad.axes[1] : 0;
+        const rx = Math.abs(pad.axes[2] ?? 0) > dead ? pad.axes[2] : 0;
+        const ry = Math.abs(pad.axes[3] ?? 0) > dead ? pad.axes[3] : 0;
+        strafe += lx;
+        thrust -= ly;
+        yaw.current -= rx * delta * 2.1;
+        pitch.current = THREE.MathUtils.clamp(pitch.current + ry * delta * 1.5, 0.18, 1.08);
+        interact = interact || !!pad.buttons[0]?.pressed;
       }
     }
-    velocity.set(x, 0, z);
-    if (velocity.lengthSq() > 1) velocity.normalize();
-    const moving = velocity.lengthSq() > 0.001;
-    const speed = 4.4;
-    player.current.position.x = THREE.MathUtils.clamp(player.current.position.x + velocity.x * speed * delta, -10, 10);
-    player.current.position.z = THREE.MathUtils.clamp(player.current.position.z + velocity.z * speed * delta, -10, 10);
-    if (moving) {
-      player.current.rotation.y = Math.atan2(velocity.x, velocity.z);
-      walkPhase.current += delta * 9;
-      player.current.position.y = Math.sin(walkPhase.current) * 0.025;
-    } else player.current.position.y *= 0.85;
 
-    let nearby: BuildingDef | null = null, best = Infinity;
-    for (const building of BUILDINGS) {
-      const d = Math.hypot(player.current.position.x - building.position[0], player.current.position.z - building.position[2]);
-      if (d < building.radius && d < best) { nearby = building; best = d; }
+    forward.set(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
+    right.set(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
+    move.copy(forward).multiplyScalar(thrust).addScaledVector(right, strafe);
+    if (move.lengthSq() > 1) move.normalize();
+
+    const speed = sprint ? 6.8 : 4.25;
+    const moving = move.lengthSq() > 0.002;
+    if (moving) {
+      root.current.position.addScaledVector(move, speed * delta);
+      root.current.position.x = THREE.MathUtils.clamp(root.current.position.x, -10.2, 10.2);
+      root.current.position.z = THREE.MathUtils.clamp(root.current.position.z, -10.2, 10.2);
+      const targetRot = Math.atan2(move.x, move.z);
+      root.current.rotation.y = THREE.MathUtils.lerp(root.current.rotation.y, targetRot, 1 - Math.pow(0.001, delta));
+      walkPhase.current += delta * (sprint ? 12 : 8.5);
+    }
+
+    const phase = walkPhase.current;
+    const amp = moving ? (sprint ? 0.78 : 0.58) : 0;
+    if (leftLeg.current) leftLeg.current.rotation.x = THREE.MathUtils.lerp(leftLeg.current.rotation.x, Math.sin(phase) * amp, 0.22);
+    if (rightLeg.current) rightLeg.current.rotation.x = THREE.MathUtils.lerp(rightLeg.current.rotation.x, -Math.sin(phase) * amp, 0.22);
+    if (leftArm.current) leftArm.current.rotation.x = THREE.MathUtils.lerp(leftArm.current.rotation.x, -Math.sin(phase) * amp * 0.72, 0.22);
+    if (rightArm.current) rightArm.current.rotation.x = THREE.MathUtils.lerp(rightArm.current.rotation.x, Math.sin(phase) * amp * 0.72, 0.22);
+    if (body.current) body.current.position.y = THREE.MathUtils.lerp(body.current.position.y, moving ? Math.abs(Math.sin(phase * 2)) * 0.045 : Math.sin(performance.now() * 0.002) * 0.015, 0.16);
+
+    let nearby: BuildingDef | null = null;
+    let best = Infinity;
+    for (const b of BUILDINGS) {
+      const d = Math.hypot(root.current.position.x - b.position[0], root.current.position.z - b.position[2]);
+      if (d < b.radius && d < best) { nearby = b; best = d; }
     }
     onNearby(nearby);
     if (interact && !lastInteract.current && nearby) window.dispatchEvent(new CustomEvent("game-interact", { detail: nearby }));
     lastInteract.current = interact;
 
-    desiredCamera.set(player.current.position.x + 7.6, 8.1, player.current.position.z + 10.2);
-    camera.position.lerp(desiredCamera, 1 - Math.pow(0.002, delta));
-    camera.lookAt(player.current.position.x, 1.0, player.current.position.z);
+    const horizontal = Math.cos(pitch.current) * distance.current;
+    target.set(root.current.position.x, 1.35, root.current.position.z);
+    desiredCam.set(
+      target.x + Math.sin(yaw.current) * horizontal,
+      target.y + Math.sin(pitch.current) * distance.current,
+      target.z + Math.cos(yaw.current) * horizontal
+    );
+    camera.position.lerp(desiredCam, 1 - Math.pow(0.0007, delta));
+    camera.lookAt(target);
   });
 
   return (
-    <group ref={player} position={[0, 0, 0]}>
-      <mesh position={[0, 1.18, 0]} castShadow><boxGeometry args={[0.62, 0.9, 0.34]} /><meshStandardMaterial color="#111" roughness={0.38} metalness={0.12} /></mesh>
-      <mesh position={[0, 1.86, 0]} castShadow><sphereGeometry args={[0.27, 18, 18]} /><meshStandardMaterial color="#d3baa6" roughness={0.64} /></mesh>
-      {[-0.22, 0.22].map((x) => <mesh key={x} position={[x, 0.48, 0]} castShadow><capsuleGeometry args={[0.11, 0.62, 5, 8]} /><meshStandardMaterial color="#252525" roughness={0.52} /></mesh>)}
-      {[-0.42, 0.42].map((x) => <mesh key={x} position={[x, 1.18, 0]} rotation={[0, 0, x < 0 ? -0.13 : 0.13]} castShadow><capsuleGeometry args={[0.09, 0.55, 5, 8]} /><meshStandardMaterial color="#d3baa6" roughness={0.62} /></mesh>)}
-      <mesh position={[0, 1.28, 0.2]}><boxGeometry args={[0.38, 0.12, 0.05]} /><meshStandardMaterial color="#c9b784" metalness={0.2} roughness={0.5} /></mesh>
+    <group ref={root} position={[0, 0, 1.4]}>
+      <group ref={body}>
+        <mesh position={[0, 1.42, 0]} castShadow><capsuleGeometry args={[0.38, 0.78, 8, 16]} /><meshStandardMaterial color="#111211" roughness={0.34} metalness={0.12} /></mesh>
+        <mesh position={[0, 2.15, 0]} castShadow><sphereGeometry args={[0.29, 20, 20]} /><meshStandardMaterial color="#d0b49f" roughness={0.62} /></mesh>
+        <mesh position={[0, 2.21, -0.08]} castShadow><sphereGeometry args={[0.295, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.48]} /><meshStandardMaterial color="#24201d" roughness={0.72} /></mesh>
+        <group ref={leftArm} position={[-0.48, 1.68, 0]}><mesh position={[0, -0.42, 0]} castShadow><capsuleGeometry args={[0.11, 0.62, 6, 10]} /><meshStandardMaterial color="#161716" roughness={0.42} /></mesh></group>
+        <group ref={rightArm} position={[0.48, 1.68, 0]}><mesh position={[0, -0.42, 0]} castShadow><capsuleGeometry args={[0.11, 0.62, 6, 10]} /><meshStandardMaterial color="#161716" roughness={0.42} /></mesh></group>
+        <group ref={leftLeg} position={[-0.2, 0.92, 0]}><mesh position={[0, -0.5, 0]} castShadow><capsuleGeometry args={[0.13, 0.75, 6, 10]} /><meshStandardMaterial color="#292b29" roughness={0.5} /></mesh><mesh position={[0, -0.98, 0.11]} castShadow><boxGeometry args={[0.26, 0.14, 0.48]} /><meshStandardMaterial color="#101010" roughness={0.55} /></mesh></group>
+        <group ref={rightLeg} position={[0.2, 0.92, 0]}><mesh position={[0, -0.5, 0]} castShadow><capsuleGeometry args={[0.13, 0.75, 6, 10]} /><meshStandardMaterial color="#292b29" roughness={0.5} /></mesh><mesh position={[0, -0.98, 0.11]} castShadow><boxGeometry args={[0.26, 0.14, 0.48]} /><meshStandardMaterial color="#101010" roughness={0.55} /></mesh></group>
+      </group>
     </group>
   );
 }
 
-function City({ activeId, onNearby }: { activeId?: string; onNearby: (building: BuildingDef | null) => void }) {
-  const trees: Vec3Tuple[] = [[-8.8,0,-7.8],[-8.6,0,-0.8],[-8.9,0,7.6],[-2.3,0,8.3],[2.4,0,8.2],[8.7,0,-7.5],[8.8,0,0.9],[8.9,0,7.5],[-2.3,0,-8.8],[2.4,0,-8.7]];
-  const lights: Vec3Tuple[] = [[-4.1,0,-1.8],[4.1,0,-1.8],[-4.1,0,1.8],[4.1,0,1.8],[-1.8,0,-4.1],[1.8,0,-4.1],[-1.8,0,4.1],[1.8,0,4.1]];
-  const planters: Vec3Tuple[] = [[-2.8,0,2.9],[2.8,0,2.9],[-2.8,0,-2.9],[2.8,0,-2.9]];
+function Fountain() {
+  const water = useRef<THREE.Mesh>(null);
+  useFrame(({ clock }) => {
+    if (water.current) water.current.scale.setScalar(1 + Math.sin(clock.elapsedTime * 1.3) * 0.012);
+  });
+  return (
+    <group>
+      <mesh position={[0, 0.32, 0]} castShadow><cylinderGeometry args={[1.18, 1.46, 0.62, 48]} /><meshStandardMaterial color="#d3ccbe" roughness={0.74} /></mesh>
+      <mesh ref={water} position={[0, 0.65, 0]}><cylinderGeometry args={[0.9, 0.9, 0.11, 48]} /><meshPhysicalMaterial color="#6f8e97" roughness={0.12} metalness={0.05} transparent opacity={0.86} clearcoat={0.8} /></mesh>
+      <mesh position={[0, 1.2, 0]} castShadow><cylinderGeometry args={[0.08, 0.12, 1.15, 16]} /><meshStandardMaterial color="#81786d" metalness={0.5} roughness={0.36} /></mesh>
+      <mesh position={[0, 1.9, 0]}><sphereGeometry args={[0.19, 18, 18]} /><meshStandardMaterial color="#fff0c8" emissive="#eecb81" emissiveIntensity={1.4} /></mesh>
+    </group>
+  );
+}
 
+function City({ activeId, onNearby }: { activeId?: string; onNearby: (b: BuildingDef | null) => void }) {
+  const trees: Vec3[] = [[-9,-7,0] as unknown as Vec3];
+  const treePositions: Vec3[] = [[-9,0,-8],[-9,0,0],[-9,0,8],[-2.4,0,8.8],[2.6,0,8.7],[9,0,-7.8],[9,0,0.5],[9,0,8],[-2.5,0,-9],[2.5,0,-9]];
+  const lights: Vec3[] = [[-4,0,-1.7],[4,0,-1.7],[-4,0,1.8],[4,0,1.8],[-1.8,0,-4.1],[1.8,0,-4.1],[-1.8,0,4.2],[1.8,0,4.2]];
+  void trees;
   return (
     <>
-      <color attach="background" args={["#b8b4aa"]} />
-      <fog attach="fog" args={["#b8b4aa", 20, 36]} />
-      <ambientLight intensity={1.25} />
-      <hemisphereLight intensity={1.05} color="#f4eee3" groundColor="#64635d" />
-      <directionalLight position={[9, 14, 7]} intensity={2.15} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
+      <color attach="background" args={["#aaa79f"]} />
+      <fog attach="fog" args={["#aaa79f", 17, 35]} />
+      <ambientLight intensity={0.95} />
+      <hemisphereLight intensity={1.25} color="#f6efe3" groundColor="#55564f" />
+      <directionalLight position={[9, 15, 7]} intensity={2.65} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-bias={-0.0004} />
+      <directionalLight position={[-7, 8, -8]} intensity={0.7} color="#9fb6ca" />
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[46, 46]} /><meshStandardMaterial color="#908d85" roughness={1} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[46, 46]} /><meshStandardMaterial color="#8f8d86" roughness={1} /></mesh>
+      <mesh position={[0, 0.026, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow><circleGeometry args={[5.45, 64]} /><meshStandardMaterial color="#c7c0b3" roughness={0.92} /></mesh>
+      <mesh position={[0, 0.052, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[3.78, 4.05, 64]} /><meshStandardMaterial color="#eee7db" roughness={0.75} /></mesh>
 
-      {[[0,-6.8,4.0,14,0],[0,6.8,4.0,14,0],[-6.8,0,4.0,14,Math.PI/2],[6.8,0,4.0,14,Math.PI/2]].map(([x,z,w,h,r],i)=><mesh key={i} position={[x,0.035,z]} rotation={[-Math.PI/2,0,r]} receiveShadow><planeGeometry args={[w,h]} /><meshStandardMaterial color={mat.road} roughness={0.98} /></mesh>)}
+      {[[0,-6.6,3.8,13.2,0],[0,6.6,3.8,13.2,0],[-6.6,0,3.8,13.2,Math.PI/2],[6.6,0,3.8,13.2,Math.PI/2]].map(([x,z,w,h,r],i)=><mesh key={i} position={[x,0.04,z]} rotation={[-Math.PI/2,0,r]} receiveShadow><planeGeometry args={[w,h]} /><meshStandardMaterial color={C.road} roughness={0.98} /></mesh>)}
 
-      {[-6.8,6.8].flatMap((z) => [-1.05,0,1.05].map((x) => <mesh key={`${z}-${x}`} position={[x,0.048,z]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[0.12,2.8]} /><meshBasicMaterial color="#d8d0c1" /></mesh>))}
-      {[-6.8,6.8].flatMap((x) => [-1.05,0,1.05].map((z) => <mesh key={`${x}-${z}`} position={[x,0.049,z]} rotation={[-Math.PI/2,0,Math.PI/2]}><planeGeometry args={[0.12,2.8]} /><meshBasicMaterial color="#d8d0c1" /></mesh>))}
+      {[-1.1,0,1.1].map((x)=><mesh key={`crossN${x}`} position={[x,0.06,-4.9]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[0.55,1.35]} /><meshBasicMaterial color="#d8d5ce" transparent opacity={0.72} /></mesh>)}
+      {[-1.1,0,1.1].map((x)=><mesh key={`crossS${x}`} position={[x,0.06,4.9]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[0.55,1.35]} /><meshBasicMaterial color="#d8d5ce" transparent opacity={0.72} /></mesh>)}
 
-      <mesh position={[0,0.025,0]} rotation={[-Math.PI/2,0,0]} receiveShadow><circleGeometry args={[5.35,64]} /><meshStandardMaterial color="#c5beb1" roughness={0.92} /></mesh>
-      <mesh position={[0,0.055,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[3.85,4.08,64]} /><meshStandardMaterial color="#eee8dc" roughness={0.75} /></mesh>
-      <mesh position={[0,0.11,0]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[5.05,5.28,64]} /><meshStandardMaterial color="#aaa396" roughness={0.88} /></mesh>
-
-      <group>
-        <mesh position={[0,0.34,0]} castShadow><cylinderGeometry args={[1.25,1.5,0.62,48]} /><meshStandardMaterial color="#d3ccbe" roughness={0.76} /></mesh>
-        <mesh position={[0,0.66,0]}><cylinderGeometry args={[0.92,0.92,0.12,48]} /><meshStandardMaterial color="#708d92" roughness={0.22} metalness={0.08} /></mesh>
-        <mesh position={[0,1.28,0]} castShadow><cylinderGeometry args={[0.08,0.12,1.25,16]} /><meshStandardMaterial color="#847b70" metalness={0.52} roughness={0.36} /></mesh>
-        <mesh position={[0,2.0,0]}><sphereGeometry args={[0.2,18,18]} /><meshStandardMaterial color="#fff0c8" emissive="#eecb81" emissiveIntensity={1.2} /></mesh>
-      </group>
-
-      {BUILDINGS.map((def) => <PremiumBuilding key={def.id} def={def} active={def.id === activeId} />)}
-      {trees.map((p,i)=><Tree key={i} position={p} scale={i%3===0?1.12:1} />)}
+      <Fountain />
+      {BUILDINGS.map((b)=><Building key={b.id} def={b} active={b.id===activeId} />)}
+      {treePositions.map((p,i)=><Tree key={i} position={p} scale={i%3===0?1.15:1} />)}
       {lights.map((p,i)=><StreetLight key={i} position={p} />)}
-      {planters.map((p,i)=><Planter key={i} position={p} />)}
-      <Bench position={[-3.25,0,0.25]} rotationY={Math.PI/2} />
-      <Bench position={[3.25,0,-0.25]} rotationY={-Math.PI/2} />
-      <Bench position={[0.25,0,3.25]} rotationY={Math.PI} />
-      <Bench position={[-0.25,0,-3.25]} />
-
-      {[-9.6,-8.8,8.8,9.6].flatMap((x)=>[-2.2,2.2].map((z)=><mesh key={`${x}-${z}`} position={[x,0.35,z]} castShadow><cylinderGeometry args={[0.08,0.1,0.7,10]} /><meshStandardMaterial color="#343434" metalness={0.5} roughness={0.38} /></mesh>))}
-
-      <Player onNearby={onNearby} />
+      <Bench position={[-3.1,0,3.2]} rotationY={0.75} /><Bench position={[3.2,0,-3.1]} rotationY={-2.3} />
+      <Planter position={[-3.2,0,-3.2]} /><Planter position={[3.3,0,3.1]} />
+      <AnimatedFounder onNearby={onNearby} />
     </>
   );
 }
@@ -459,12 +395,31 @@ export default function World() {
 
   return (
     <div className="gameViewport">
-      <Canvas shadows dpr={[1, 1.65]} camera={{ position: [7.6, 8.1, 10.2], fov: 47 }} gl={{ antialias: true, powerPreference: "high-performance" }}>
+      <Canvas
+        shadows
+        dpr={[1, 1.65]}
+        camera={{ position: [7, 6, 9], fov: 48, near: 0.1, far: 80 }}
+        gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.08;
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+        }}
+      >
         <City activeId={nearby?.id} onNearby={setNearby} />
       </Canvas>
 
-      <div className="districtLabel"><span>DISTRITO</span><strong>NEGOCIOS & INNOVACIÓN</strong></div>
-      {nearby && <div className="interactionPrompt"><span className="interactionKey">E / A</span><div><small>ENTRAR A</small><strong>{nearby.label}</strong></div></div>}
+      <div className="districtLabel"><span>DISTRITO 01</span><strong>CENTRO EMPRENDEDOR</strong></div>
+      <div className="cameraHint">MOUSE: ARRASTRAR CÁMARA · RUEDA: ZOOM · SHIFT: CORRER</div>
+
+      {nearby && (
+        <div className="interactionPrompt">
+          <span className="interactionKey">E / A</span>
+          <div><small>ENTRAR A</small><strong>{nearby.label}</strong><small>{nearby.subtitle}</small></div>
+        </div>
+      )}
       {message && <div className="gameToast">{message}</div>}
     </div>
   );
