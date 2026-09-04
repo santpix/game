@@ -24,7 +24,7 @@ export default function Home() {
       </section>
 
       <div className="footerBar">
-        <span>MOVER: WASD / FLECHAS · INTERACTUAR: E / A</span>
+        <span>WASD · SHIFT CORRER · MOUSE ROTAR · RUEDA ZOOM · E INTERACTUAR</span>
         <span>SANTPIX × MERCO × DROPI · POTENCIADO POR IA</span>
       </div>
     </main>
