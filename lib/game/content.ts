@@ -1,0 +1,58 @@
+export type StatKey = "cash" | "revenue" | "brand" | "customers" | "operations" | "growth" | "inventory";
+export type GameStats = Record<StatKey, number>;
+export type Effect = Partial<GameStats>;
+export type Decision = { id: string; title: string; description: string; effect: Effect; feedback: string; days?: number };
+export type Scenario = { id: string; building: "santpix" | "merco" | "dropi" | "bank" | "ai"; chapter: 1 | 2 | 3; title: string; question: string; context: string; decisions: Decision[] };
+
+export const INITIAL_STATS: GameStats = { cash: 10000000, revenue: 0, brand: 18, customers: 0, operations: 24, growth: 20, inventory: 40 };
+
+export const SCENARIOS: Scenario[] = [
+ {id:"web-1",building:"santpix",chapter:1,title:"Tu primera tienda",question:"Tus ventas viven en WhatsApp. ¿Cómo construís la primera experiencia digital?",context:"Tenés poco capital, 1 producto y 90 días para demostrar que el negocio puede crecer.",decisions:[
+  {id:"w1a",title:"Ecommerce profesional",description:"Invertir en UX, checkout, analytics y automatización.",effect:{cash:-3000000,brand:14,operations:14,growth:12},feedback:"La inversión duele al inicio, pero ahora podés medir y convertir mejor.",days:7},
+  {id:"w1b",title:"Seguir sólo con WhatsApp",description:"Ahorrás caja, pero el proceso sigue siendo manual.",effect:{cash:0,customers:6,operations:-10,growth:-5},feedback:"Vendés algo, pero cada pedido consume tiempo y no escala.",days:4},
+  {id:"w1c",title:"Web barata sin estrategia",description:"Publicar rápido sin optimizar conversión ni medición.",effect:{cash:-900000,brand:-5,operations:2,growth:-3},feedback:"Estás online, pero el sitio no resuelve el cuello de botella.",days:3}]},
+ {id:"growth-1",building:"merco",chapter:1,title:"Primer presupuesto de marketing",question:"Tenés ₲4M disponibles para generar demanda. ¿Qué hacés?",context:"Todavía no conocés bien tu CAC y tu marca es nueva.",decisions:[
+  {id:"g1a",title:"Test de performance",description:"Creatividades, audiencias pequeñas y medición antes de escalar.",effect:{cash:-1800000,revenue:3200000,customers:18,brand:7,growth:13},feedback:"El test encuentra señales útiles sin quemar toda la caja.",days:6},
+  {id:"g1b",title:"Gastar todo en alcance",description:"Buscar millones de impresiones desde el primer día.",effect:{cash:-4000000,revenue:1100000,customers:7,brand:9,growth:-9},feedback:"Mucho tráfico, poca intención. El CAC se dispara.",days:5},
+  {id:"g1c",title:"No invertir",description:"Esperar crecimiento completamente orgánico.",effect:{cash:0,revenue:350000,customers:3,growth:-4},feedback:"Protegés caja, pero perdés velocidad y aprendizaje.",days:7}]},
+ {id:"supply-1",building:"dropi",chapter:1,title:"Stock o catálogo",question:"Un producto empieza a moverse. ¿Cómo respondés a la demanda?",context:"Si comprás demasiado stock inmovilizás caja; si comprás poco podés perder ventas.",decisions:[
+  {id:"d1a",title:"Fulfillment flexible",description:"Ampliar catálogo y tercerizar parte de la operación.",effect:{cash:-1200000,revenue:2200000,inventory:25,operations:16,growth:8},feedback:"Ganás capacidad sin llenar un depósito propio.",days:5},
+  {id:"d1b",title:"Comprar stock agresivamente",description:"Apostar fuerte por el producto ganador.",effect:{cash:-3500000,inventory:55,operations:5,growth:5},feedback:"Tenés producto, pero una gran parte de tu caja quedó inmovilizada.",days:5},
+  {id:"d1c",title:"Mantener stock mínimo",description:"Reducir riesgo financiero aunque falte producto.",effect:{cash:-500000,revenue:900000,inventory:-12,brand:-4},feedback:"Te quedaste sin stock durante picos de demanda.",days:4}]},
+ {id:"bank-1",building:"bank",chapter:1,title:"Capital para crecer",question:"El banco ofrece ₲12M de crédito. ¿Lo tomás?",context:"El capital acelera, pero la deuda agrega presión al negocio.",decisions:[
+  {id:"b1a",title:"Crédito con plan",description:"Tomar ₲6M y asignarlo a tecnología, adquisición y operación.",effect:{cash:6000000,operations:5,growth:8},feedback:"Usás deuda como herramienta, no como salvavidas.",days:2},
+  {id:"b1b",title:"Tomar los ₲12M",description:"Maximizar caja ahora y preocuparte después.",effect:{cash:12000000,growth:4,operations:-8},feedback:"Tenés caja, pero ahora el negocio carga una obligación importante.",days:2},
+  {id:"b1c",title:"Rechazar crédito",description:"Crecer sólo con flujo propio.",effect:{cash:0,growth:-3,brand:2},feedback:"Menos riesgo, pero también menos velocidad.",days:1}]},
+ {id:"ai-1",building:"ai",chapter:1,title:"Copiloto de negocio",question:"¿Dónde aplicás IA primero?",context:"La IA puede acelerar tareas, pero automatizar un proceso malo sólo lo hace fallar más rápido.",decisions:[
+  {id:"a1a",title:"Analizar métricas",description:"Detectar pérdidas, conversión, CAC y productos con potencial.",effect:{cash:-400000,operations:8,growth:10},feedback:"La IA te ayuda a decidir con datos en vez de intuición.",days:2},
+  {id:"a1b",title:"Automatizar atención",description:"Resolver preguntas repetitivas y liberar horas del equipo.",effect:{cash:-650000,customers:7,operations:14,brand:4},feedback:"El equipo recupera tiempo y responde más rápido.",days:3},
+  {id:"a1c",title:"Generar contenido masivo",description:"Publicar mucho contenido sin estrategia ni revisión.",effect:{cash:-300000,brand:-7,growth:1},feedback:"Aumentó el volumen, no necesariamente la calidad.",days:2}]},
+ {id:"web-2",building:"santpix",chapter:2,title:"Conversión bajo presión",question:"Llegan visitas pero sólo 0,7% compra. ¿Qué priorizás?",context:"Marketing está funcionando, pero el checkout pierde usuarios.",decisions:[
+  {id:"w2a",title:"Optimizar conversión",description:"UX research, velocidad, checkout y pruebas.",effect:{cash:-2200000,revenue:6500000,customers:32,brand:8,growth:16},feedback:"La misma inversión en tráfico ahora produce más ventas.",days:6},
+  {id:"w2b",title:"Comprar más tráfico",description:"Compensar la baja conversión con volumen.",effect:{cash:-3500000,revenue:2400000,customers:12,growth:-12},feedback:"Amplificaste un embudo roto.",days:5},
+  {id:"w2c",title:"Descuento permanente",description:"Bajar precio para forzar compras.",effect:{revenue:3900000,customers:25,brand:-12,growth:-4},feedback:"Suben pedidos, pero deteriorás margen y percepción.",days:5}]},
+ {id:"growth-2",building:"merco",chapter:2,title:"Escalar una campaña",question:"Encontraste una campaña rentable. ¿Cómo escalás?",context:"El ROAS es bueno, pero duplicar presupuesto no garantiza duplicar resultados.",decisions:[
+  {id:"g2a",title:"Escala progresiva",description:"Aumentar inversión por etapas y refrescar creatividades.",effect:{cash:-3000000,revenue:8200000,customers:42,brand:10,growth:18},feedback:"Crecés manteniendo control del CAC.",days:7},
+  {id:"g2b",title:"10× presupuesto",description:"Intentar dominar el mercado inmediatamente.",effect:{cash:-7000000,revenue:4800000,customers:30,growth:-15},feedback:"Saturaste audiencias y destruiste eficiencia.",days:6},
+  {id:"g2c",title:"No tocar nada",description:"Mantener el presupuesto ganador indefinidamente.",effect:{revenue:2600000,customers:14,growth:-3},feedback:"La campaña sigue funcionando, pero otros competidores avanzan.",days:7}]},
+ {id:"supply-2",building:"dropi",chapter:2,title:"Promesa de entrega",question:"Las ventas crecieron y aparecen retrasos. ¿Qué hacés?",context:"La experiencia después del checkout ya está afectando reseñas.",decisions:[
+  {id:"d2a",title:"Rediseñar fulfillment",description:"SLA, tracking, proveedores alternativos y automatización.",effect:{cash:-2400000,operations:22,brand:12,customers:8,growth:10},feedback:"La operación deja de ser el freno del crecimiento.",days:6},
+  {id:"d2b",title:"Prometer igual",description:"Mantener la publicidad aunque logística no pueda cumplir.",effect:{revenue:3300000,brand:-20,operations:-14,customers:-5},feedback:"Vendiste hoy a costa de la confianza de mañana.",days:5},
+  {id:"d2c",title:"Pausar ventas",description:"Frenar adquisición hasta ordenar el depósito.",effect:{cash:-500000,operations:15,growth:-8,brand:5},feedback:"Protegés reputación pero perdés momentum.",days:5}]},
+ {id:"ai-2",building:"ai",chapter:2,title:"Predicción de demanda",question:"Tenés datos suficientes para empezar a predecir. ¿Qué automatizás?",context:"El negocio ya genera señales de ventas, inventario y adquisición.",decisions:[
+  {id:"a2a",title:"Forecast de inventario",description:"Cruzar demanda, campañas y rotación.",effect:{cash:-900000,inventory:18,operations:18,growth:8},feedback:"Comprás mejor y reducís faltantes.",days:4},
+  {id:"a2b",title:"Pricing automático",description:"Cambiar precios agresivamente según demanda.",effect:{revenue:2800000,brand:-8,growth:3},feedback:"Mejoraste ingresos puntuales, pero confundiste a clientes.",days:3},
+  {id:"a2c",title:"No usar datos",description:"Seguir tomando decisiones manualmente.",effect:{operations:-8,growth:-6},feedback:"La complejidad ya supera lo que una persona puede controlar sola.",days:4}]},
+ {id:"scale-1",building:"bank",chapter:3,title:"Expansión regional",question:"El negocio funciona en Paraguay. ¿Entrás a otro mercado?",context:"Expandir multiplica oportunidad y también complejidad.",decisions:[
+  {id:"s1a",title:"Piloto regional",description:"Entrar con catálogo limitado, presupuesto controlado y métricas claras.",effect:{cash:-4500000,revenue:10500000,customers:55,brand:15,operations:5,growth:22},feedback:"Validaste otro mercado sin apostar toda la empresa.",days:10},
+  {id:"s1b",title:"Abrir tres países",description:"Lanzamiento simultáneo para crecer rápido.",effect:{cash:-9000000,revenue:7000000,operations:-25,growth:4},feedback:"La complejidad operativa te golpeó antes que el crecimiento.",days:12},
+  {id:"s1c",title:"Quedarte local",description:"Profundizar el mercado actual.",effect:{revenue:3800000,brand:8,growth:-5},feedback:"Negocio sólido, aunque con techo de crecimiento más cercano.",days:8}]}
+];
+
+export const BUILDING_INTERIORS = {
+ santpix:{name:"SantPix · Tech Lab",description:"Arquitectura digital, ecommerce, UX, integraciones y automatización."},
+ merco:{name:"Merco · Growth Studio",description:"Adquisición, performance, contenido, funnels y crecimiento."},
+ dropi:{name:"Dropi · Commerce Hub",description:"Catálogo, proveedores, logística, inventario y fulfillment."},
+ bank:{name:"Centro Financiero",description:"Capital, riesgo, crédito y decisiones de expansión."},
+ ai:{name:"Centro IA",description:"Análisis, predicción, automatización y copiloto de decisiones."}
+} as const;
