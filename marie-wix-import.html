@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Marie Galvin Fine Millinery — La Belle Époque SS26</title>
+<meta name="description" content="Marie Galvin Fine Millinery creates handcrafted hats, fascinators and sculptural special-occasion headpieces in New Hampshire.">
+<style>
+:root{
+  --ivory:#F4F1EA;
+  --black:#000000;
+  --stone:#C0BAB0;
+  --bronze:#8F6F52;
+  --serif:"Didot","Bodoni 72","Bodoni MT","Baskerville","Times New Roman",serif;
+  --sans:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --gutter:clamp(18px,3vw,54px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ivory);color:var(--black);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+img{display:block;width:100%;height:auto}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+::selection{background:#000;color:#fff}
+.site-header{
+  position:fixed;inset:0 0 auto 0;z-index:50;
+  height:92px;padding:0 var(--gutter);
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  color:#fff;border-bottom:1px solid rgba(255,255,255,.26);
+  transition:background .35s ease,color .35s ease,border-color .35s ease;
+}
+.site-header.is-solid{background:rgba(244,241,234,.97);color:#000;border-color:rgba(0,0,0,.16);backdrop-filter:blur(6px)}
+.nav{display:flex;gap:24px;align-items:center;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+.nav.right{justify-content:flex-end}
+.logo-wrap{width:156px}
+.logo-wrap img{height:52px;object-fit:cover;object-position:center}
+.mobile-trigger{display:none}
+.hero{min-height:100svh;position:relative;overflow:hidden;background:#111}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 35%}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.48),rgba(0,0,0,.12) 45%,rgba(0,0,0,.22))}
+.hero-copy{position:relative;z-index:2;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;padding:0 var(--gutter) 9vh;max-width:1000px}
+.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin-bottom:18px}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(52px,8vw,124px);line-height:.9;letter-spacing:-.045em;margin:0 0 24px;max-width:980px}
+.text-link{display:inline-block;width:max-content;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid currentColor;position:relative}
+.text-link:after{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:0;background:currentColor;transition:width .3s ease}
+.text-link:hover:after{width:100%}
+.section{padding:clamp(80px,11vw,170px) var(--gutter)}
+.manifesto{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.82fr);gap:clamp(50px,8vw,140px);align-items:center}
+.kicker{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#555;margin-bottom:26px}
+.display{font-family:var(--serif);font-weight:400;letter-spacing:-.035em;line-height:.98;margin:0}
+.manifesto .display{font-size:clamp(52px,6.7vw,105px);max-width:9ch}
+.manifesto p{font-family:var(--serif);font-size:clamp(22px,2.15vw,34px);line-height:1.32;margin:34px 0 40px;max-width:25ch}
+.manifesto-image{aspect-ratio:4/5;overflow:hidden}
+.manifesto-image img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+.manifesto-image:hover img{transform:scale(1.02)}
+.section-head{display:grid;grid-template-columns:1fr auto;align-items:end;border-top:1px solid #000;padding-top:18px;margin-bottom:56px}
+.section-head h2{font-family:var(--serif);font-size:clamp(46px,5.6vw,88px);font-weight:400;letter-spacing:-.04em;line-height:.92;margin:0}
+.section-head .meta{font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}
+.product-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gutter);align-items:start}
+.product{min-width:0}
+.product .image{overflow:hidden;background:#e9e5dd}
+.product .image img{width:100%;height:100%;object-fit:cover;transition:transform .75s cubic-bezier(.2,.7,.2,1)}
+.product:hover img{transform:scale(1.02)}
+.product-info{display:grid;grid-template-columns:1fr auto;gap:18px;padding-top:13px;align-items:baseline}
+.product-name{font-family:var(--serif);font-size:clamp(23px,2vw,31px);line-height:1}
+.price{font-size:10px;letter-spacing:.08em;white-space:nowrap}
+.compare{opacity:.5;text-decoration:line-through;margin-left:7px}
+.sold{font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-top:8px}
+.p1{grid-column:1/span 4}.p1 .image{aspect-ratio:4/5}
+.p2{grid-column:5/span 4;margin-top:8vw}.p2 .image{aspect-ratio:3/4}
+.p3{grid-column:9/span 4}.p3 .image{aspect-ratio:4/5}
+.p4{grid-column:1/span 5;margin-top:7vw}.p4 .image{aspect-ratio:5/6}
+.p5{grid-column:7/span 3;margin-top:2vw}.p5 .image{aspect-ratio:3/4}
+.p6{grid-column:10/span 3;margin-top:10vw}.p6 .image{aspect-ratio:3/4}
+.collection-cta{display:flex;justify-content:center;margin-top:78px}
+.editorial-break{position:relative;height:min(82vw,960px);min-height:620px;overflow:hidden;background:#111;color:#fff}
+.editorial-break img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.editorial-break:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.52),rgba(0,0,0,.05) 58%,rgba(0,0,0,.08))}
+.editorial-copy{position:absolute;z-index:2;left:var(--gutter);bottom:8vw;max-width:580px}
+.editorial-copy h2{font-family:var(--serif);font-weight:400;font-size:clamp(54px,7.4vw,116px);line-height:.9;letter-spacing:-.045em;margin:0 0 26px}
+.heritage{display:grid;grid-template-columns:1.1fr .9fr;gap:10vw;align-items:start}
+.heritage h2{font-size:clamp(64px,8.2vw,132px);max-width:8ch}
+.heritage-copy{padding-top:12px;border-top:1px solid #000}
+.heritage-copy p{font-family:var(--serif);font-size:clamp(23px,2.3vw,34px);line-height:1.35;margin:30px 0}
+.heritage-copy .small{font-family:var(--sans);font-size:12px;line-height:1.7;max-width:48ch;color:#333}
+.editorial-strip{display:grid;grid-template-columns:1.2fr .8fr 1fr .85fr;gap:clamp(14px,2.1vw,36px);align-items:end}
+.editorial-strip .item:nth-child(1) .image{aspect-ratio:3/4}
+.editorial-strip .item:nth-child(2) .image{aspect-ratio:4/5;margin-bottom:6vw}
+.editorial-strip .item:nth-child(3) .image{aspect-ratio:5/7}
+.editorial-strip .item:nth-child(4) .image{aspect-ratio:3/4;margin-bottom:2vw}
+.item .image{overflow:hidden;background:#e9e5dd}
+.item img{width:100%;height:100%;object-fit:cover;transition:transform .7s ease}
+.item:hover img{transform:scale(1.02)}
+.item .label{font-family:var(--serif);font-size:23px;margin-top:12px}
+.item .sub{font-size:10px;letter-spacing:.09em;margin-top:6px}
+.atelier{background:#000;color:#fff;display:grid;grid-template-columns:1fr 1fr;min-height:780px}
+.atelier-media{overflow:hidden}
+.atelier-media img{width:100%;height:100%;object-fit:cover}
+.atelier-copy{padding:clamp(60px,8vw,130px);display:flex;flex-direction:column;justify-content:center}
+.atelier-copy h2{font-size:clamp(64px,7.7vw,120px)}
+.atelier-copy p{font-family:var(--serif);font-size:clamp(22px,2.1vw,33px);line-height:1.35;max-width:20ch;margin:30px 0 40px}
+.journal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gutter)}
+.article .thumb{aspect-ratio:4/5;overflow:hidden;background:#ddd}
+.article img{width:100%;height:100%;object-fit:cover;transition:transform .7s ease}
+.article:hover img{transform:scale(1.02)}
+.article .num{font-size:10px;letter-spacing:.18em;margin-top:14px;text-transform:uppercase}
+.article h3{font-family:var(--serif);font-weight:400;font-size:clamp(27px,2.4vw,37px);line-height:1.05;margin:12px 0 0}
+.newsletter{padding:clamp(100px,14vw,210px) var(--gutter);border-top:1px solid #000}
+.newsletter-inner{display:grid;grid-template-columns:1fr 1fr;gap:10vw;align-items:end}
+.newsletter h2{font-size:clamp(64px,7vw,110px);max-width:8ch}
+.signup{display:grid;grid-template-columns:1fr auto;border-bottom:1px solid #000;padding:0 0 14px;align-items:end}
+.signup input{border:0;background:transparent;outline:none;font-family:var(--serif);font-size:25px;padding:0;color:#000}
+.signup button{border:0;background:transparent;text-transform:uppercase;letter-spacing:.14em;font-size:10px;cursor:pointer}
+footer{background:#000;color:#fff;padding:70px var(--gutter) 40px}
+.footer-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;align-items:start}
+.footer-logo{width:260px;max-width:80%}
+.footer-col{font-size:11px;line-height:2;letter-spacing:.06em}
+.footer-col strong{display:block;text-transform:uppercase;letter-spacing:.16em;font-size:9px;margin-bottom:12px;color:#aaa}
+.footer-bottom{display:flex;justify-content:space-between;gap:30px;margin-top:70px;padding-top:18px;border-top:1px solid rgba(255,255,255,.24);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#aaa}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+@media(max-width:900px){
+  .site-header{height:74px;grid-template-columns:1fr auto 1fr;padding:0 18px}
+  .nav{display:none}.mobile-trigger{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+  .mobile-trigger.right{text-align:right}
+  .logo-wrap{width:118px}.logo-wrap img{height:40px}
+  .hero-copy{padding:0 18px 10vh}.hero h1{font-size:clamp(56px,18vw,92px)}
+  .section{padding:88px 18px}
+  .manifesto{grid-template-columns:1fr;gap:54px}.manifesto .display{max-width:10ch}
+  .manifesto p{font-size:27px}
+  .section-head{grid-template-columns:1fr;gap:12px;margin-bottom:34px}.section-head .meta{order:-1}
+  .product-grid{grid-template-columns:repeat(2,1fr);gap:44px 14px}
+  .p1,.p2,.p3,.p4,.p5,.p6{grid-column:auto;margin-top:0}
+  .p2,.p5{margin-top:70px}.p4,.p6{margin-top:20px}
+  .product-name{font-size:22px}.product-info{grid-template-columns:1fr;gap:6px}
+  .editorial-break{height:82svh;min-height:620px}
+  .editorial-copy{left:18px;right:18px;bottom:55px}.editorial-copy h2{font-size:64px}
+  .heritage{grid-template-columns:1fr;gap:58px}.heritage h2{font-size:72px}
+  .editorial-strip{grid-template-columns:1fr 1fr;gap:42px 14px}
+  .editorial-strip .item:nth-child(2) .image,.editorial-strip .item:nth-child(4) .image{margin-bottom:0}
+  .editorial-strip .item:nth-child(even){margin-top:60px}
+  .atelier{grid-template-columns:1fr;min-height:0}.atelier-media{height:72svh}.atelier-copy{padding:80px 18px}
+  .journal-grid{grid-template-columns:1fr;gap:64px}
+  .article .thumb{aspect-ratio:4/5}
+  .newsletter{padding:95px 18px}.newsletter-inner{grid-template-columns:1fr;gap:60px}
+  .footer-top{grid-template-columns:1fr;gap:38px}.footer-logo{width:220px}.footer-bottom{flex-direction:column;gap:10px}
+}
+</style>
+</head>
+<body>
+<header class="site-header" id="header">
+  <div class="nav">
+    <a href="#collection">NEW</a><a href="#collection">SHOP</a><a href="#collection">COLLECTIONS</a>
+  </div>
+  <div class="mobile-trigger">MENU</div>
+  <a class="logo-wrap" href="#top" aria-label="Marie Galvin Millinery">
+    <img src="https://static.wixstatic.com/media/74bc96_1e090eef3b334eb69b6c87affbc140ab~mv2.jpg" alt="Marie Galvin Millinery logo">
+  </a>
+  <div class="nav right">
+    <a href="#atelier">BESPOKE</a><a href="#atelier">ATELIER</a><a href="#journal">JOURNAL</a><a href="#">SEARCH</a><a href="#">BAG (0)</a>
+  </div>
+  <div class="mobile-trigger right">BAG (0)</div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <img src="https://static.wixstatic.com/media/74bc96_99008c977d7046adb190780061a1bfd8~mv2.jpg" alt="Marie Galvin SS26 millinery editorial">
+  <div class="hero-copy">
+    <div class="eyebrow">SS26 — LA BELLE ÉPOQUE</div>
+    <h1>Millinery,<br>as an art form.</h1>
+    <a class="text-link" href="#collection">Discover the collection</a>
+  </div>
+</section>
+
+<section class="section manifesto reveal">
+  <div>
+    <div class="kicker">01 — THE ATELIER</div>
+    <h2 class="display">Handcrafted in the atelier.</h2>
+    <p>Each piece begins by hand — sculpted, wired, stitched and finished in Marie Galvin’s New Hampshire studio.</p>
+    <a class="text-link" href="#atelier">Enter the atelier</a>
+  </div>
+  <div class="manifesto-image">
+    <img src="https://static.wixstatic.com/media/74bc96_49bcb4a4f5714adb820bf78d7ea7463c~mv2.jpg" alt="Chloé royal blue headpiece by Marie Galvin">
+  </div>
+</section>
+
+<section class="section" id="collection">
+  <div class="section-head reveal">
+    <h2>La Belle Époque — SS26</h2>
+    <div class="meta">10 pieces / handcrafted / limited</div>
+  </div>
+  <div class="product-grid">
+    <article class="product p1 reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_49bcb4a4f5714adb820bf78d7ea7463c~mv2.jpg" alt="Chloé by Marie Galvin"></div>
+      <div class="product-info"><div class="product-name">Chloé</div><div class="price">$229.50 <span class="compare">$255</span></div></div>
+    </article>
+    <article class="product p2 reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_71751b768acb4476bcbc9714869a909f~mv2.jpg" alt="Je t’aime by Marie Galvin"></div>
+      <div class="product-info"><div class="product-name">Je t’aime</div><div class="price">$247.50 <span class="compare">$275</span></div></div>
+    </article>
+    <article class="product p3 reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_02c47187cb7142c38b5add5f8fad2a5e~mv2.jpg" alt="Delphine by Marie Galvin"></div>
+      <div class="product-info"><div class="product-name">Delphine</div><div class="price">$315 <span class="compare">$350</span></div></div>
+    </article>
+    <article class="product p4 reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_bc7b8ae106004812b90b2f98ae667b14~mv2.jpg" alt="Colette by Marie Galvin"></div>
+      <div class="product-info"><div class="product-name">Colette</div><div class="price">$355.50 <span class="compare">$395</span></div></div>
+    </article>
+    <article class="product p5 reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_dde98674bb2e4749a0029d0e7f8000bf~mv2.jpg" alt="Angélique by Marie Galvin"></div>
+      <div class="product-info"><div class="product-name">Angélique</div><div class="price">$405 <span class="compare">$450</span></div></div>
+    </article>
+    <article class="product p6 reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_f60d452d45e147e787e59e1b9b511932~mv2.jpg" alt="Fleur de Parisienne by Marie Galvin"></div>
+      <div class="product-info"><div class="product-name">Fleur de Parisienne</div><div class="price">$315 <span class="compare">$350</span></div></div>
+    </article>
+  </div>
+  <div class="collection-cta"><a class="text-link" href="#">View the collection</a></div>
+</section>
+
+<section class="editorial-break reveal">
+  <img src="https://static.wixstatic.com/media/74bc96_51ecdf17a9ae4187a290833e512acfdf~mv2.jpg" alt="Camille pale yellow hatinator by Marie Galvin">
+  <div class="editorial-copy">
+    <div class="eyebrow">SCULPTURAL / FEMININE / UNMISTAKABLE</div>
+    <h2>Made to enter a room.</h2>
+    <a class="text-link" href="#collection">Shop SS26</a>
+  </div>
+</section>
+
+<section class="section heritage reveal">
+  <div>
+    <div class="kicker">02 — HERITAGE</div>
+    <h2 class="display">Irish heritage.<br>Modern millinery.</h2>
+  </div>
+  <div class="heritage-copy">
+    <p>Tradition is not nostalgia. It is technique, discipline and an instinct for proportion carried forward by hand.</p>
+    <div class="small">Marie’s work brings old-world craft into a modern wardrobe: sculptural wirework, hand-finished flowers, couture headbands and one-of-a-kind forms created for weddings, racing season, Royal Ascot, the Kentucky Derby and every occasion that calls for presence.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head reveal">
+    <h2>Further from the collection</h2>
+    <div class="meta">SS26 / selected pieces</div>
+  </div>
+  <div class="editorial-strip">
+    <article class="item reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_0543a152544042b382ade36182aa4113~mv2.jpg" alt="Ophelia by Marie Galvin"></div>
+      <div class="label">Ophelia</div><div class="sub">SOLD OUT · $315 <span class="compare">$350</span></div>
+    </article>
+    <article class="item reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_149010ecbfe04326abd4ca34058dccf9~mv2.jpg" alt="The Moonlit Whisper by Marie Galvin"></div>
+      <div class="label">The Moonlit Whisper</div><div class="sub">$315 <span class="compare">$350</span></div>
+    </article>
+    <article class="item reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_1174a4a091624d269387f5725bfc339d~mv2.jpg" alt="Lucienne by Marie Galvin"></div>
+      <div class="label">Lucienne</div><div class="sub">$265.50 <span class="compare">$295</span></div>
+    </article>
+    <article class="item reveal">
+      <div class="image"><img src="https://static.wixstatic.com/media/74bc96_51ecdf17a9ae4187a290833e512acfdf~mv2.jpg" alt="Camille by Marie Galvin"></div>
+      <div class="label">Camille</div><div class="sub">$405 <span class="compare">$450</span></div>
+    </article>
+  </div>
+</section>
+
+<section class="atelier" id="atelier">
+  <div class="atelier-media">
+    <img src="https://static.wixstatic.com/media/74bc96_5b6442bd0c8e4900a96801ca5d1859dc~mv2.jpg" alt="Marie Galvin editorial millinery">
+  </div>
+  <div class="atelier-copy reveal">
+    <div class="kicker" style="color:#aaa">03 — BESPOKE / ATELIER</div>
+    <h2 class="display">A piece made for you.</h2>
+    <p>For weddings, race days and singular occasions, Marie creates headpieces with the wearer, the silhouette and the moment in mind.</p>
+    <a class="text-link" href="mailto:marie@mariegalvin.com">Begin a conversation</a>
+  </div>
+</section>
+
+<section class="section" id="journal">
+  <div class="section-head reveal">
+    <h2>The Journal</h2>
+    <div class="meta">Notes from the atelier</div>
+  </div>
+  <div class="journal-grid">
+    <article class="article reveal">
+      <div class="thumb"><img src="https://static.wixstatic.com/media/74bc96_5b6442bd0c8e4900a96801ca5d1859dc~mv2.jpg" alt="Styling fascinators editorial"></div>
+      <div class="num">01 / Journal</div>
+      <h3>Tips for Styling Fascinators and Headpieces</h3>
+    </article>
+    <article class="article reveal">
+      <div class="thumb"><img src="https://static.wixstatic.com/media/74bc96_2cc0a0b43c6b47238f23ced8874822a2~mv2.jpg" alt="Kiss of the Spider Lily editorial"></div>
+      <div class="num">02 / Journal</div>
+      <h3>Kiss of the Spider Lily!</h3>
+    </article>
+    <article class="article reveal">
+      <div class="thumb"><img src="https://static.wixstatic.com/media/74bc96_86fcbcb12e694e3b844409ee3eccc539~mv2.jpg" alt="Marie Galvin millinery history"></div>
+      <div class="num">03 / Journal</div>
+      <h3>Celebrating 20 years as Boston’s “go to” milliner.</h3>
+    </article>
+  </div>
+</section>
+
+<section class="newsletter">
+  <div class="newsletter-inner reveal">
+    <div>
+      <div class="kicker">Letters from the atelier</div>
+      <h2 class="display">New work.<br>Quietly delivered.</h2>
+    </div>
+    <form class="signup" onsubmit="event.preventDefault()">
+      <input type="email" aria-label="Email address" placeholder="Your email address">
+      <button type="submit">Subscribe →</button>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="footer-top">
+    <div><img class="footer-logo" src="https://static.wixstatic.com/media/74bc96_1e090eef3b334eb69b6c87affbc140ab~mv2.jpg" alt="Marie Galvin Millinery"></div>
+    <div class="footer-col"><strong>Visit</strong>New Hampshire, USA<br><a href="mailto:marie@mariegalvin.com">marie@mariegalvin.com</a><br><a href="tel:+16178342910">+1 617 834 2910</a><br>@mariegalvinmillinery</div>
+    <div class="footer-col"><strong>Explore</strong><a href="#collection">Shop</a><br><a href="#atelier">Atelier</a><br><a href="#journal">Journal</a><br><a href="#">Returns & Exchanges</a><br><a href="#">Shipping</a></div>
+  </div>
+  <div class="footer-bottom"><span>Marie Galvin Fine Millinery</span><span>Handcrafted in New Hampshire</span><span>© 2026</span></div>
+</footer>
+
+<script>
+const header=document.getElementById('header');
+const onScroll=()=>header.classList.toggle('is-solid',window.scrollY>40);
+onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+const io=new IntersectionObserver((entries)=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
